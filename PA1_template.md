@@ -1,9 +1,4 @@
----
-title: 'Reproducible Research: Peer Assessment 1'
-output:
-  html_document:
-    keep_md: yes
----
+# Reproducible Research: Peer Assessment 1
 
 ## Loading and preprocessing the data
 
@@ -17,7 +12,8 @@ There are a total of 17,568 observations in the dataset. The variables included 
 
 The data structure is rather simple, so it's not necessary to do any preprocessing or transformation.
 
-```{r echo = TRUE, cache = TRUE}
+
+```r
 setwd('~/repo/RepData_PeerAssessment1')
 # It's strange that you can't use open = 'r' to unz, otherwise you'll get a 
 # seek not enabled error with read.csv. 
@@ -31,18 +27,24 @@ df <- read.csv(con, na.strings = 'NA', stringsAsFactors = FALSE)
 
 The dataset consists the data of 2 months, i.e., 61 days. After calculating the total number of steps taken per day, and making a histogram of them, the distribution of the daily steps is clear to see. 
 
-```{r echo = TRUE, cache = TRUE}
+
+```r
 library(dplyr)
 df2 <- df %>% 
     group_by(date) %>% 
     summarise(day_total = sum(steps, na.rm = TRUE))
 with(df2, hist(day_total, main = 'Histogram of steps taken each day', 
                           xlab = 'steps'))
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
+```r
 day_mean <- mean(df2$day_total)
 day_median <- median(df2$day_total)
 ```
 
-The mean and median of the total number of steps taken per day are `r round(day_mean, digits = 0)` and `r day_median` respectively. 
+The mean and median of the total number of steps taken per day are 9354 and 10395 respectively. 
 
 ## What is the average daily activity pattern?
 
@@ -51,13 +53,19 @@ The time series plot of the 5-minute interval and the average number of steps ta
 * At night, the activity level is rather low.
 * During the day, the number of steps taken each 5-minute interval goes up and down, with a peak between 8:35 to 8:40 (this interval contains the maximum number of steps about 206). Maybe the individual is walking to work then, or is doing some morning exercises.
 
-```{r echo = TRUE, cache = TRUE}
+
+```r
 df3 <- df %>% 
     group_by(interval) %>% 
     summarise(avg_steps = mean(steps, na.rm = TRUE))
 with(df3, plot(interval, avg_steps, type = 'l', 
                main = 'Plot of average steps each interval', 
                xlab = '5-minute interval', ylab = 'average steps'))
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
+```r
 max_steps <- df3 %>% filter(avg_steps == max(avg_steps))
 ```
 
@@ -65,13 +73,15 @@ max_steps <- df3 %>% filter(avg_steps == max(avg_steps))
 
 Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
 
-```{r echo = TRUE, cache = TRUE}
+
+```r
 na_num <- sum(!complete.cases(df))
 ```
 
-The total number of missing values in the dataset (i.e. the total number of rows with NAs) is `r na_num`. I prefer to using the mean for the specific 5-minute interval to fill in each missing value in the dataset, because people tends to do the same thing at the same time each day. 
+The total number of missing values in the dataset (i.e. the total number of rows with NAs) is 2304. I prefer to using the mean for the specific 5-minute interval to fill in each missing value in the dataset, because people tends to do the same thing at the same time each day. 
 
-```{r echo = TRUE, cache = TRUE}
+
+```r
 df_complete <- df[complete.cases(df), ]
 df_incomplete <- df[!complete.cases(df), ]
 df_incomplete <- merge(df_incomplete, df3, by = 'interval', all.x = TRUE)
@@ -85,11 +95,16 @@ df_filled2 <- df_filled %>%
 with(df_filled2, hist(day_total, main = 'Histogram of steps taken each day', 
                       sub = '(missinag values filled with 5-minute averages)',
                       xlab = 'steps'))
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
+
+```r
 day_mean_filled <- mean(df_filled2$day_total)
 day_median_filled <- median(df_filled2$day_total)
 ```
 
-The new histogram of the total numbers taken each day is a little bit different from the original one. The **mean** and **median** go up to `r round(day_mean_filled, digits = 0)` and `r round(day_median_filled, digits = 0)` respectively. Imputing missing data increased the number of steps taken for the days with NA observations, and the cause is rather intuitive: the original histogram just discarded the NA values, while the new one used some numbers to fill in.
+The new histogram of the total numbers taken each day is a little bit different from the original one. The **mean** and **median** go up to 1.0766\times 10^{4} and 1.0766\times 10^{4} respectively. Imputing missing data increased the number of steps taken for the days with NA observations, and the cause is rather intuitive: the original histogram just discarded the NA values, while the new one used some numbers to fill in.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -98,11 +113,19 @@ Based on the devided dataset of 2 groups: weekend and weekday, the panel plot of
 * At weekend, the individual get up much later than weekdays - just like me do :)
 * During the daytime at weekend, the activity level tends to be at high level all day long, though the range is a little bit smaller. I think that's natural and intuitive.
 
-```{r echo = TRUE, cache = TRUE}
+
+```r
 library(lattice)
 if (Sys.getlocale(category = 'LC_TIME') != 'en_US.UTF-8'){
     Sys.setlocale(category = 'LC_TIME', locale = 'en_US.UTF-8')
 }
+```
+
+```
+## [1] "en_US.UTF-8"
+```
+
+```r
 df_filled <- df_filled %>% 
     mutate(weekday_grp = weekdays(as.Date(date)) %in% 
                                   c('Saturday', 'Sunday')) %>%
@@ -115,5 +138,7 @@ with(df_filled, xyplot(avg_steps ~ interval | weekday_grp, type = 'l',
                        layout = c(1, 2), ylab = 'Number of steps',
                        main = 'Plot of average steps each interval (weekday vs weekend)'))
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
 
 (THE END)
