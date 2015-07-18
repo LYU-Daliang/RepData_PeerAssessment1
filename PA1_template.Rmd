@@ -5,6 +5,11 @@ output:
     keep_md: yes
 ---
 
+```{r echo = TRUE}
+# Set the global options
+opts_chunk$set(echo = TRUE, cache = TRUE)
+```
+
 ## Loading and preprocessing the data
 
 The data is from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.
@@ -17,7 +22,7 @@ There are a total of 17,568 observations in the dataset. The variables included 
 
 The data structure is rather simple, so it's not necessary to do any preprocessing or transformation.
 
-```{r echo = TRUE, cache = TRUE}
+```{r}
 setwd('~/repo/RepData_PeerAssessment1')
 # It's strange that you can't use open = 'r' to unz, otherwise you'll get a 
 # seek not enabled error with read.csv. 
@@ -31,7 +36,7 @@ df <- read.csv(con, na.strings = 'NA', stringsAsFactors = FALSE)
 
 The dataset consists the data of 2 months, i.e., 61 days. After calculating the total number of steps taken per day, and making a histogram of them, the distribution of the daily steps is clear to see. 
 
-```{r echo = TRUE, cache = TRUE}
+```{r}
 library(dplyr)
 df2 <- df %>% 
     group_by(date) %>% 
@@ -51,7 +56,7 @@ The time series plot of the 5-minute interval and the average number of steps ta
 * At night, the activity level is rather low.
 * During the day, the number of steps taken each 5-minute interval goes up and down, with a peak between 8:35 to 8:40 (this interval contains the maximum number of steps about 206). Maybe the individual is walking to work then, or is doing some morning exercises.
 
-```{r echo = TRUE, cache = TRUE}
+```{r}
 df3 <- df %>% 
     group_by(interval) %>% 
     summarise(avg_steps = mean(steps, na.rm = TRUE))
@@ -65,13 +70,13 @@ max_steps <- df3 %>% filter(avg_steps == max(avg_steps))
 
 Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
 
-```{r echo = TRUE, cache = TRUE}
+```{r}
 na_num <- sum(!complete.cases(df))
 ```
 
 The total number of missing values in the dataset (i.e. the total number of rows with NAs) is `r na_num`. I prefer to using the mean for the specific 5-minute interval to fill in each missing value in the dataset, because people tends to do the same thing at the same time each day. 
 
-```{r echo = TRUE, cache = TRUE}
+```{r}
 df_complete <- df[complete.cases(df), ]
 df_incomplete <- df[!complete.cases(df), ]
 df_incomplete <- merge(df_incomplete, df3, by = 'interval', all.x = TRUE)
@@ -89,7 +94,7 @@ day_mean_filled <- mean(df_filled2$day_total)
 day_median_filled <- median(df_filled2$day_total)
 ```
 
-The new histogram of the total numbers taken each day is a little bit different from the original one. The **mean** and **median** go up to `r round(day_mean_filled, digits = 0)` and `r round(day_median_filled, digits = 0)` respectively. Imputing missing data increased the number of steps taken for the days with NA observations, and the cause is rather intuitive: the original histogram just discarded the NA values, while the new one used some numbers to fill in.
+The new histogram of the total numbers taken each day is a little bit different from the original one. The **mean** and **median** go up to `r round(day_mean_filled, digits = 0)` and `r round(day_median_filled, digits = 0)` respectively. (It's really interesting that the new mean and median are exactly the same, maybe it has some bearing on the strategy used to fill in the missing values.) Imputing missing data increased the number of steps taken for the days with NA observations, and the cause is rather intuitive: the original histogram just discarded the NA values, while the new one used some numbers to fill in.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -98,8 +103,10 @@ Based on the devided dataset of 2 groups: weekend and weekday, the panel plot of
 * At weekend, the individual get up much later than weekdays - just like me do :)
 * During the daytime at weekend, the activity level tends to be at high level all day long, though the range is a little bit smaller. I think that's natural and intuitive.
 
-```{r echo = TRUE, cache = TRUE}
+```{r}
 library(lattice)
+# Set LC_TIME to en_US.UTF-8 to ensure the convenience to use Saturday, Sunday
+# in the following code chunk
 if (Sys.getlocale(category = 'LC_TIME') != 'en_US.UTF-8'){
     Sys.setlocale(category = 'LC_TIME', locale = 'en_US.UTF-8')
 }

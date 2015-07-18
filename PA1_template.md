@@ -1,4 +1,15 @@
-# Reproducible Research: Peer Assessment 1
+---
+title: 'Reproducible Research: Peer Assessment 1'
+output:
+  html_document:
+    keep_md: yes
+---
+
+
+```r
+# Set the global options
+opts_chunk$set(echo = TRUE, cache = TRUE)
+```
 
 ## Loading and preprocessing the data
 
@@ -30,6 +41,22 @@ The dataset consists the data of 2 months, i.e., 61 days. After calculating the 
 
 ```r
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 df2 <- df %>% 
     group_by(date) %>% 
     summarise(day_total = sum(steps, na.rm = TRUE))
@@ -37,7 +64,7 @@ with(df2, hist(day_total, main = 'Histogram of steps taken each day',
                           xlab = 'steps'))
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
 
 ```r
 day_mean <- mean(df2$day_total)
@@ -63,7 +90,7 @@ with(df3, plot(interval, avg_steps, type = 'l',
                xlab = '5-minute interval', ylab = 'average steps'))
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
 
 ```r
 max_steps <- df3 %>% filter(avg_steps == max(avg_steps))
@@ -97,14 +124,14 @@ with(df_filled2, hist(day_total, main = 'Histogram of steps taken each day',
                       xlab = 'steps'))
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
 
 ```r
 day_mean_filled <- mean(df_filled2$day_total)
 day_median_filled <- median(df_filled2$day_total)
 ```
 
-The new histogram of the total numbers taken each day is a little bit different from the original one. The **mean** and **median** go up to 1.0766\times 10^{4} and 1.0766\times 10^{4} respectively. Imputing missing data increased the number of steps taken for the days with NA observations, and the cause is rather intuitive: the original histogram just discarded the NA values, while the new one used some numbers to fill in.
+The new histogram of the total numbers taken each day is a little bit different from the original one. The **mean** and **median** go up to 1.0766 &times; 10<sup>4</sup> and 1.0766 &times; 10<sup>4</sup> respectively. (It's really interesting that the new mean and median are exactly the same, maybe it has some bearing on the strategy used to fill in the missing values.) Imputing missing data increased the number of steps taken for the days with NA observations, and the cause is rather intuitive: the original histogram just discarded the NA values, while the new one used some numbers to fill in.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -116,6 +143,8 @@ Based on the devided dataset of 2 groups: weekend and weekday, the panel plot of
 
 ```r
 library(lattice)
+# Set LC_TIME to en_US.UTF-8 to ensure the convenience to use Saturday, Sunday
+# in the following code chunk
 if (Sys.getlocale(category = 'LC_TIME') != 'en_US.UTF-8'){
     Sys.setlocale(category = 'LC_TIME', locale = 'en_US.UTF-8')
 }
@@ -139,6 +168,6 @@ with(df_filled, xyplot(avg_steps ~ interval | weekday_grp, type = 'l',
                        main = 'Plot of average steps each interval (weekday vs weekend)'))
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png) 
 
 (THE END)
